@@ -1,4 +1,6 @@
 import 'package:advanced_taskapp/utils/colors.dart';
+import 'package:advanced_taskapp/views/tasks/tasks_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FloatingTaskwidget extends StatelessWidget {
@@ -10,8 +12,8 @@ class FloatingTaskwidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        //
-      
+        Navigator.push(
+            context, CupertinoPageRoute(builder: (_) => TasksView()));
       },
       child: Material(
         borderRadius: BorderRadius.circular(15),
