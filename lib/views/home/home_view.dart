@@ -1,8 +1,11 @@
 import 'package:advanced_taskapp/utils/colors.dart';
+import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/home/widgets/floating_taskwidget.dart';
 import 'package:advanced_taskapp/views/home/widgets/task_widget.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -12,6 +15,8 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  final List<int> testing = [1, 3, 4];
+
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
@@ -34,13 +39,12 @@ class _HomeViewState extends State<HomeView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 /// CircularProgressIndicator
-                SizedBox(
+                const SizedBox(
                   width: 25,
                   height: 25,
                   child: CircularProgressIndicator(
                     value: 1 / 3,
-                    valueColor:
-                        const AlwaysStoppedAnimation(MyColors.primaryColor),
+                    valueColor: AlwaysStoppedAnimation(MyColors.primaryColor),
                     backgroundColor: Colors.grey,
                     // value: checkDoneTask(tasks) / valueOfTheIndicator(tasks),
                   ),
@@ -67,8 +71,8 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
+          const Padding(
+            padding: EdgeInsets.only(top: 10.0),
             child: Divider(
               thickness: 2,
               indent: 80,
@@ -76,15 +80,62 @@ class _HomeViewState extends State<HomeView> {
           ),
 
           SizedBox(
-            height: MediaQuery.of(context).size.height - 190,
-            child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: 20,
-              itemBuilder: (context, index) {
-                return TaskWidget();
-              },
-            ),
-          )
+              height: MediaQuery.of(context).size.height - 190,
+              child: testing.isNotEmpty
+                  ? ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: testing.length,
+                      itemBuilder: (context, index) {
+                        return Dismissible(
+                            direction: DismissDirection.horizontal,
+                            onDismissed: (_) {
+                              setState(() {
+                                testing.removeAt(index);
+                              });
+                            },
+                            background: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  MyString.deleteTask,
+                                  style: TextStyle(color: Colors.grey),
+                                )
+                              ],
+                            ),
+                            key: Key(
+                              index.toString(),
+                            ),
+                            child: const TaskWidget());
+                      },
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FadeIn(
+                          child: SizedBox(
+                            width: 300,
+                            height: 300,
+                            child: Lottie.asset(
+                              lottieURL,
+                              animate: testing.isNotEmpty ? false : true,
+                            ),
+                          ),
+                        ),
+                        FadeInUp(
+                            from: 30,
+                            child: const Text(
+                              MyString.doneAllTask,
+                              style: TextStyle(color: Colors.black),
+                            ))
+                      ],
+                    ))
         ]),
       ),
     );
