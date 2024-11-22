@@ -1,15 +1,12 @@
-import 'package:advanced_taskapp/utils/colors.dart';
-import 'package:advanced_taskapp/utils/constants.dart';
+import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/home/component/custom_slider.dart';
 import 'package:advanced_taskapp/views/home/component/slider_drawer.dart';
 import 'package:advanced_taskapp/views/home/widgets/floating_taskwidget.dart';
 import 'package:advanced_taskapp/views/home/widgets/task_widget.dart';
-import 'package:advanced_taskapp/views/tasks/widgets/tasktextfield.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
-import 'package:lottie/lottie.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,21 +17,19 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final TextEditingController controller = TextEditingController();
-  final List<int> testing = [];
+  final List<int> testing = [1, 2];
   GlobalKey<SliderDrawerState> drawerKey = GlobalKey<SliderDrawerState>();
 
-  
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
-            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        resizeToAvoidBottomInset: true, 
+          resizeToAvoidBottomInset: true,
           backgroundColor: Colors.white,
-      
+
           //Tab
           floatingActionButton: const FloatingTaskwidget(),
           body: SliderDrawer(
@@ -100,8 +95,6 @@ class _HomeViewState extends State<HomeView> {
             indent: 80,
           ),
         ),
-        TaskTextField(controller: controller),
-       
 
         Flexible(
           child: SizedBox(
@@ -138,7 +131,15 @@ class _HomeViewState extends State<HomeView> {
                             key: Key(
                               index.toString(),
                             ),
-                            child: const TaskWidget());
+                            child: TaskWidget(
+                              task: Task(
+                                  id: "id",
+                                  title: "title",
+                                  subTitle: "subTitle",
+                                  createdAtDate: DateTime.now(),
+                                  createdAtTime: DateTime.now(),
+                                  isCompleted: true),
+                            ));
                       },
                     )
                   //task list is empty

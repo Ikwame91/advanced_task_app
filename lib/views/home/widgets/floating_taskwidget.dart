@@ -13,7 +13,14 @@ class FloatingTaskwidget extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context, CupertinoPageRoute(builder: (_) => TasksView()));
+            context,
+            CupertinoPageRoute(
+              builder: (_) => TasksView(
+                taskControllerForTitle: null,
+                descriptiomController: null,
+                task: null,
+              ),
+            ));
       },
       child: Material(
         borderRadius: BorderRadius.circular(15),

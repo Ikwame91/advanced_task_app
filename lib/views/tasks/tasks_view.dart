@@ -1,3 +1,4 @@
+import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/tasks/components/date_time_select.dart';
@@ -8,15 +9,29 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class TasksView extends StatefulWidget {
-  const TasksView({super.key});
-
+  const TasksView({
+    super.key,
+    required this.taskControllerForTitle,
+    required this.descriptiomController,
+    required this.task,
+  });
+  final TextEditingController ?taskControllerForTitle;
+  final TextEditingController? descriptiomController;
+  final Task? task;
   @override
   State<TasksView> createState() => _TasksViewState();
 }
 
 class _TasksViewState extends State<TasksView> {
-  final TextEditingController taskControllerForTitle = TextEditingController();
-  final TextEditingController descriptiomController = TextEditingController();
+  bool isTasklreadyExists() {
+    if (widget.taskControllerForTitle?.text == null &&
+        widget.descriptiomController?.text == null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
@@ -32,6 +47,7 @@ class _TasksViewState extends State<TasksView> {
             physics: const BouncingScrollPhysics(),
             child: Column(
               children: [
+                //toptext
                 const TopText(),
                 SizedBox(
                   width: double.infinity,
@@ -47,7 +63,7 @@ class _TasksViewState extends State<TasksView> {
                       ),
 
                       /// Title TextField
-                      TaskTextField(controller: taskControllerForTitle),
+                      TaskTextField(controller: widget.taskControllerForTitle!),
 
                       const SizedBox(
                         height: 10,
@@ -55,7 +71,7 @@ class _TasksViewState extends State<TasksView> {
 
                       /// Note TextField
                       TaskTextField(
-                        controller: descriptiomController,
+                        controller: widget.descriptiomController!,
                         isForDescription: true,
                       ),
 

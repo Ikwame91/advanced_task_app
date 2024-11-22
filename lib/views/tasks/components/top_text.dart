@@ -1,10 +1,23 @@
+import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:flutter/material.dart';
 
 class TopText extends StatelessWidget {
   const TopText({
-    super.key,
-  });
+    super.key, this.taskControllerForTitle, this.descriptiomController, this.task,
+  }); final TextEditingController ?taskControllerForTitle;
+  final TextEditingController? descriptiomController;
+  final Task? task;
+
+    bool isTasklreadyExists() {
+    if (taskControllerForTitle?.text == null &&
+        descriptiomController?.text == null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,15 +1,47 @@
+import 'package:advanced_taskapp/data/hive_data_store.dart';
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/views/home/home_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-Future <void> main() async{
-await Hive.initFlutter();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
 
-Hive.registerAdapter<Task>(TaskAdapter());
+  Hive.registerAdapter<Task>(TaskAdapter());
 
-  runApp(const MyApp());
+  try {
+    var box = await Hive.openBox<Task>(HiveDataStore.boxName);
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error opening Hive box: $e');
+    }
+  }
+  runApp(BaseWidget(child: const MyApp()));
+
 }
+
+class BaseWidget extends InheritedWidget {
+  BaseWidget({super.key, required this.child}) : super(child: child);
+  final HiveDataStore dataStore = HiveDataStore();
+  final Widget child;
+
+  static BaseWidget of(BuildContext context) {
+    final base = context.dependOnInheritedWidgetOfExactType<BaseWidget>();
+    if (base != null) {
+      return base;
+    } else {
+      throw StateError('Could not find ancestor widget of type BaseWidget');
+    }
+  }
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    return false;
+  }
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

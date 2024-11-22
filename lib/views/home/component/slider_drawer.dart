@@ -1,3 +1,4 @@
+import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -74,6 +75,7 @@ class _SliderDrawerWidgetState extends State<SliderDrawerWidget>
               padding: const EdgeInsets.only(right: 20),
               child: GestureDetector(
                 onTap: () {
+                  deleteAllTask(context);
                   // base.isEmpty
                   //     ? warningNoTask(context)
                   //     : deleteAllTask(context);
@@ -90,4 +92,3 @@ class _SliderDrawerWidgetState extends State<SliderDrawerWidget>
     );
   }
 }
-

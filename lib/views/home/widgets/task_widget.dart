@@ -1,11 +1,37 @@
-
+import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class TaskWidget extends StatelessWidget {
+class TaskWidget extends StatefulWidget {
   const TaskWidget({
     super.key,
+    required this.task,
   });
+  final Task task;
+
+  @override
+  State<TaskWidget> createState() => _TaskWidgetState();
+}
+
+class _TaskWidgetState extends State<TaskWidget> {
+  TextEditingController textEditingControllerForTitle = TextEditingController();
+  TextEditingController textEditingControllerForSubTitle =
+      TextEditingController();
+
+  @override
+  void initState() {
+    textEditingControllerForTitle.text = widget.task.title;
+    textEditingControllerForSubTitle.text = widget.task.subTitle;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    textEditingControllerForTitle.dispose();
+    textEditingControllerForSubTitle.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +40,11 @@ class TaskWidget extends StatelessWidget {
         ///navigate to task view to view details about task
       },
       child: AnimatedContainer(
-        margin:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-            color: MyColors.primaryColor.withOpacity(0.2),
+            color: widget.task.isCompleted
+                ? MyColors.primaryColor.withOpacity(0.2)
+                : Colors.white,
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
@@ -34,7 +61,9 @@ class TaskWidget extends StatelessWidget {
             },
             child: AnimatedContainer(
               decoration: BoxDecoration(
-                color: MyColors.primaryColor,
+                color: widget.task.isCompleted
+                    ? MyColors.primaryColor
+                    : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey, width: .8),
               ),
@@ -45,25 +74,37 @@ class TaskWidget extends StatelessWidget {
               ),
             ),
           ),
-          title: const Padding(
+          title: Padding(
             padding: EdgeInsets.only(
               bottom: 5,
               top: 3,
             ),
             child: Text(
-              'Done',
+             textEditingControllerForTitle.text,
               style: TextStyle(
-                  color: Colors.black, fontWeight: FontWeight.w600),
+                color: widget.task.isCompleted
+                    ? MyColors.primaryColor
+                    : Colors.black,
+                fontWeight: FontWeight.w600,
+                decoration:
+                    widget.task.isCompleted ? TextDecoration.lineThrough : null,
+              ),
             ),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Description",
+               textEditingControllerForSubTitle.text,
                 style: TextStyle(
-                    color: Colors.grey.shade900,
-                    fontWeight: FontWeight.w400),
+                  color: widget.task.isCompleted
+                      ? MyColors.primaryColor
+                      : Colors.black,
+                  fontWeight: FontWeight.w400,
+                  decoration: widget.task.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
               ),
               Align(
                 alignment: Alignment.centerRight,
@@ -76,17 +117,21 @@ class TaskWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Date",
+                        DateFormat("hh:mm:a").format(widget.task.createdAtDate),
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey.shade900,
+                          color: widget.task.isCompleted
+                              ? Colors.white
+                              : Colors.grey.shade900,
                         ),
                       ),
                       Text(
-                        "SubDate",
+                        DateFormat.yMMMEd().format(widget.task.createdAtDate),
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade700,
+                          color: widget.task.isCompleted
+                              ? Colors.white
+                              : Colors.grey.shade700,
                         ),
                       ),
                     ],
