@@ -18,7 +18,7 @@ class TaskTextField extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: ListTile(
         title: TextFormField(
-          maxLines: isForDescription ? 3 : 6,
+          maxLines: isForDescription ? 1 : 3,
           cursorHeight: isForDescription ? 60 : null,
           controller: controller,
           style: const TextStyle(color: Colors.black),

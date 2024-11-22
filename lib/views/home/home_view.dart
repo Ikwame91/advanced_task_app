@@ -5,6 +5,7 @@ import 'package:advanced_taskapp/views/home/component/custom_slider.dart';
 import 'package:advanced_taskapp/views/home/component/slider_drawer.dart';
 import 'package:advanced_taskapp/views/home/widgets/floating_taskwidget.dart';
 import 'package:advanced_taskapp/views/home/widgets/task_widget.dart';
+import 'package:advanced_taskapp/views/tasks/widgets/tasktextfield.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
@@ -18,30 +19,38 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  final TextEditingController controller = TextEditingController();
   final List<int> testing = [];
   GlobalKey<SliderDrawerState> drawerKey = GlobalKey<SliderDrawerState>();
+
+  
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-        backgroundColor: Colors.white,
+    return GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
 
-        //Tab
-        floatingActionButton: const FloatingTaskwidget(),
-        body: SliderDrawer(
-          key: drawerKey,
-          isDraggable: false,
-          animationDuration: 1000,
-          slider: CustomSlider(),
-          appBar: SliderDrawerWidget(
-            drawerKey: drawerKey,
-          ),
-          child: _buildBody(textTheme, context),
-        ));
+      child: Scaffold(
+        resizeToAvoidBottomInset: true, 
+          backgroundColor: Colors.white,
+      
+          //Tab
+          floatingActionButton: const FloatingTaskwidget(),
+          body: SliderDrawer(
+            key: drawerKey,
+            isDraggable: false,
+            animationDuration: 1000,
+            slider: CustomSlider(),
+            appBar: SliderDrawerWidget(
+              drawerKey: drawerKey,
+            ),
+            child: _buildBody(textTheme, context),
+          )),
+    );
   }
 
-  SizedBox _buildBody(TextTheme textTheme, BuildContext context) {
+  Widget _buildBody(TextTheme textTheme, BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -60,14 +69,11 @@ class _HomeViewState extends State<HomeView> {
                 height: 25,
                 child: CircularProgressIndicator(
                   value: 1 / 3,
-                  valueColor: AlwaysStoppedAnimation(MyColors.primaryColor),
+                  valueColor: AlwaysStoppedAnimation(Colors.blue),
                   backgroundColor: Colors.grey,
-                  // value: checkDoneTask(tasks) / valueOfTheIndicator(tasks),
                 ),
               ),
-              const SizedBox(
-                width: 25,
-              ),
+              const SizedBox(width: 25),
 
               /// Texts
               Column(
@@ -94,6 +100,8 @@ class _HomeViewState extends State<HomeView> {
             indent: 80,
           ),
         ),
+        TaskTextField(controller: controller),
+       
 
         Flexible(
           child: SizedBox(
