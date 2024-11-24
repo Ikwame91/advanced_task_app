@@ -7,6 +7,7 @@ import 'package:advanced_taskapp/views/tasks/widgets/task_view_appbar.dart';
 import 'package:advanced_taskapp/views/tasks/widgets/tasktextfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TasksView extends StatefulWidget {
   const TasksView({
@@ -15,7 +16,7 @@ class TasksView extends StatefulWidget {
     required this.descriptiomController,
     required this.task,
   });
-  final TextEditingController ?taskControllerForTitle;
+  final TextEditingController? taskControllerForTitle;
   final TextEditingController? descriptiomController;
   final Task? task;
   @override
@@ -23,12 +24,52 @@ class TasksView extends StatefulWidget {
 }
 
 class _TasksViewState extends State<TasksView> {
-  bool isTasklreadyExists() {
-    if (widget.taskControllerForTitle?.text == null &&
-        widget.descriptiomController?.text == null) {
-      return true;
+  var title;
+  var subTitle;
+  DateTime? time;
+  DateTime? date;
+
+  /// Show Selected Time as String Format
+  String showTime(DateTime? time) {
+    if (widget.task?.createdAtTime == null) {
+      if (time == null) {
+        return DateFormat('hh:mm a').format(DateTime.now());
+      } else {
+        return DateFormat('hh:mm a').format(time);
+      }
     } else {
-      return false;
+      return DateFormat('hh:mm a').format(widget.task!.createdAtTime);
+    }
+  }
+
+  /// Show Selected Time as DateTime Format
+  DateTime showTimeAsDateTime(DateTime? time) {
+    if (widget.task?.createdAtTime == null) {
+      return time ?? DateTime.now();
+    } else {
+      return widget.task!.createdAtTime;
+    }
+  }
+
+  /// Show Selected Date as String Format
+  String showDate(DateTime? date) {
+    if (widget.task?.createdAtDate == null) {
+      if (date == null) {
+        return DateFormat.yMMMEd().format(DateTime.now());
+      } else {
+        return DateFormat.yMMMEd().format(date);
+      }
+    } else {
+      return DateFormat.yMMMEd().format(widget.task!.createdAtDate);
+    }
+  }
+
+  /// Show Selected Date as DateTime Format
+  DateTime showDateAsDateTime(DateTime? date) {
+    if (widget.task?.createdAtDate == null) {
+      return date ?? DateTime.now();
+    } else {
+      return widget.task!.createdAtDate;
     }
   }
 
@@ -63,7 +104,16 @@ class _TasksViewState extends State<TasksView> {
                       ),
 
                       /// Title TextField
-                      TaskTextField(controller: widget.taskControllerForTitle!),
+                      TaskTextField(
+                        controller: widget.taskControllerForTitle ??
+                            TextEditingController(),
+                        onFieldSubmitted: (String inputTitle) {
+                          title = inputTitle;
+                        },
+                        onChanged: (String inputTitle) {
+                          title = inputTitle;
+                        },
+                      ),
 
                       const SizedBox(
                         height: 10,
@@ -71,33 +121,71 @@ class _TasksViewState extends State<TasksView> {
 
                       /// Note TextField
                       TaskTextField(
-                        controller: widget.descriptiomController!,
+                        controller: widget.descriptiomController ??
+                            TextEditingController(),
                         isForDescription: true,
+                        onFieldSubmitted: (String inputSubTitle) {
+                          subTitle = inputSubTitle;
+                        },
+                        onChanged: (String inputSubTitle) {
+                          subTitle = inputSubTitle;
+                        },
                       ),
 
                       DateTimeSelection(
                         title: MyString.timeString,
+                        time:
+                            showTime(time), // Display selected or default time
                         onTap: () async {
-                          TimeOfDay initialTime = TimeOfDay.now();
+                          TimeOfDay initialTime =
+                              TimeOfDay.fromDateTime(showTimeAsDateTime(time));
 
-                          TimeOfDay? selectedTime = await showModalBottomSheet(
+                          TimeOfDay? selectedTime =
+                              await showModalBottomSheet<TimeOfDay>(
                             context: context,
                             builder: (_) => SizedBox(
                               height: 220,
                               child: TimePickerDialog(initialTime: initialTime),
                             ),
                           );
-                          if (selectedTime != null) {}
+
+                          if (selectedTime != null) {
+                            setState(() {
+                              if (widget.task?.createdAtTime == null) {
+                                time = DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                  selectedTime.hour,
+                                  selectedTime.minute,
+                                );
+                              } else {
+                                widget.task!.createdAtTime = DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                  selectedTime.hour,
+                                  selectedTime.minute,
+                                );
+                              }
+                            });
+                          }
+
+                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
 
                       DateTimeSelection(
+                        isTime: true,
                         title: MyString.dateString,
+                        time: showDate(date),
                         onTap: () async {
+                          DateTime initialDate = showDateAsDateTime(date);
+
                           DateTime? selectedDate =
                               await showModalBottomSheet<DateTime>(
                             context: context,
-                            builder: (context) {
+                            builder: (_) {
                               return Container(
                                 padding: const EdgeInsets.all(16),
                                 height: 400,
@@ -111,14 +199,17 @@ class _TasksViewState extends State<TasksView> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-
-                                    /// Use a custom Calendar widget or a GridView for dates
                                     Expanded(
                                       child: CalendarDatePicker(
-                                        initialDate: DateTime.now(),
+                                        initialDate: initialDate,
                                         firstDate: DateTime(2000),
                                         lastDate: DateTime(2100),
-                                        onDateChanged: (date) {},
+                                        onDateChanged: (selectedDate) {
+                                          Navigator.pop(
+                                            context,
+                                            selectedDate,
+                                          ); // Return selected date
+                                        },
                                       ),
                                     ),
                                   ],
@@ -127,9 +218,20 @@ class _TasksViewState extends State<TasksView> {
                             },
                           );
 
-                          if (selectedDate != null) {}
+                          if (selectedDate != null) {
+                            setState(() {
+                              if (widget.task?.createdAtDate == null) {
+                                date = selectedDate;
+                              } else {
+                                widget.task!.createdAtDate = selectedDate;
+                              }
+                            });
+                          }
+
+                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

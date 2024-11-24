@@ -6,11 +6,14 @@ class TaskTextField extends StatelessWidget {
     super.key,
     required this.controller,
     this.isForDescription = false,
+    required this.onFieldSubmitted,
+    required this.onChanged,
   });
 
   final TextEditingController controller;
   final bool isForDescription;
-
+  final Function(String)? onFieldSubmitted;
+  final Function(String)? onChanged;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,8 +36,8 @@ class TaskTextField extends StatelessWidget {
             focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey.shade300)),
           ),
-          onFieldSubmitted: (value) {},
-          onChanged: (value) {},
+          onFieldSubmitted:onFieldSubmitted,
+          onChanged: onChanged,
         ),
       ),
     );

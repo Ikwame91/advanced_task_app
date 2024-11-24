@@ -10,13 +10,14 @@ class FloatingTaskwidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController textEditingController = TextEditingController();
     return GestureDetector(
       onTap: () {
         Navigator.push(
             context,
             CupertinoPageRoute(
               builder: (_) => TasksView(
-                taskControllerForTitle: null,
+                taskControllerForTitle: textEditingController,
                 descriptiomController: null,
                 task: null,
               ),

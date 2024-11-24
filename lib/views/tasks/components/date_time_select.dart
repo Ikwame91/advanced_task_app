@@ -5,9 +5,12 @@ class DateTimeSelection extends StatelessWidget {
     super.key,
     this.onTap,
     required this.title,
+    required this.time,  this.isTime=false,
   });
   final void Function()? onTap;
   final String title;
+  final String time;
+final bool isTime;
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
@@ -34,15 +37,15 @@ class DateTimeSelection extends StatelessWidget {
             ),
             Container(
               margin: EdgeInsets.only(right: 10),
-              width: 80,
+              width: isTime?150:80,
               height: 35,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.grey.shade300,
+                color: Colors.grey.shade100,
               ),
               child: Center(
                 child: Text(
-                  title,
+                  time,
                   style: textTheme.titleSmall,
                 ),
               ),
