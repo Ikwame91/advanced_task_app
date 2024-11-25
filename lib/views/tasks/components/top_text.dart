@@ -16,9 +16,9 @@ class TopText extends StatelessWidget {
   bool isTasklreadyExists() {
     if (taskControllerForTitle?.text == null &&
         descriptiomController?.text == null) {
-      return true;
-    } else {
       return false;
+    } else {
+      return true;
     }
   }
 

@@ -1,4 +1,6 @@
+import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/models/task.dart';
+import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/home/component/custom_slider.dart';
 import 'package:advanced_taskapp/views/home/component/slider_drawer.dart';
@@ -7,6 +9,8 @@ import 'package:advanced_taskapp/views/home/widgets/task_widget.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -17,35 +21,50 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final TextEditingController controller = TextEditingController();
-  final List<int> testing = [1, 2];
   GlobalKey<SliderDrawerState> drawerKey = GlobalKey<SliderDrawerState>();
+  String _selectedSortOption = 'Title';
+
 
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
+    final base = BaseWidget.of(context);
 
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          backgroundColor: Colors.white,
+    return ValueListenableBuilder(
+      valueListenable: base.dataStore.listenToTask(),
+      builder: ( ctx, Box<Task> box, Widget? child) {
+        var tasks = box.values.toList();
 
-          //Tab
-          floatingActionButton: const FloatingTaskwidget(),
-          body: SliderDrawer(
-            key: drawerKey,
-            isDraggable: false,
-            animationDuration: 1000,
-            slider: CustomSlider(),
-            appBar: SliderDrawerWidget(
-              drawerKey: drawerKey,
-            ),
-            child: _buildBody(textTheme, context),
-          )),
+          tasks.sort(((a, b) => a.createdAtDate.compareTo(b.createdAtDate)));
+        return GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: Scaffold(
+              resizeToAvoidBottomInset: true,
+              backgroundColor: Colors.white,
+
+              //Tab
+              floatingActionButton: const FloatingTaskwidget(),
+              body: SliderDrawer(
+                  key: drawerKey,
+                  isDraggable: false,
+                  animationDuration: 1000,
+                  slider: CustomSlider(),
+                  appBar: SliderDrawerWidget(
+                    drawerKey: drawerKey,
+                  ),
+                  child: _buildBody(
+                    textTheme,
+                    
+                    base,
+                    tasks,
+                  ))),
+        );
+      },
     );
   }
 
-  Widget _buildBody(TextTheme textTheme, BuildContext context) {
+  Widget _buildBody(TextTheme textTheme, BaseWidget base,
+      List<Task> tasks,) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -96,79 +115,90 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
 
+        // Sorting dropdown
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //   child: Row(
+        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //     children: [
+        //       Text("Sort Tasks By:", style: textTheme.headlineSmall),
+        //       DropdownButton<String>(
+        //         value: _selectedSortOption,
+        //         items: ['Title', 'Date'].map((String option) {
+        //           return DropdownMenuItem<String>(
+        //             value: option,
+        //             child: Text(option),
+        //           );
+        //         }).toList(),
+        //         onChanged: (String? newValue) {
+        //           if (newValue != null) {
+        //             _selectedSortOption = newValue;
+        //             _sortTasks(tasks); // Apply sorting
+        //           }
+        //         },
+        //       ),
+        //     ],
+        //   ),
+        // ),
+
         Flexible(
           child: SizedBox(
-              height: MediaQuery.of(context).size.height - 190,
-              child: testing.isNotEmpty
-                  //task list is not empty
-                  ? ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: testing.length,
-                      itemBuilder: (context, index) {
-                        return Dismissible(
-                            direction: DismissDirection.horizontal,
-                            onDismissed: (_) {
-                              setState(() {
-                                testing.removeAt(index);
-                              });
-                            },
-                            background: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  MyString.deleteTask,
-                                  style: TextStyle(color: Colors.grey),
-                                )
-                              ],
-                            ),
-                            key: Key(
-                              index.toString(),
-                            ),
-                            child: TaskWidget(
-                              task: Task(
-                                  id: "id",
-                                  title: "title",
-                                  subTitle: "subTitle",
-                                  createdAtDate: DateTime.now(),
-                                  createdAtTime: DateTime.now(),
-                                  isCompleted: true),
-                            ));
-                      },
-                    )
-                  //task list is empty
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        //lottie animation
-
-                        FadeIn(
-                          child: SizedBox(
-                            width: 300,
-                            height: 300,
-                            //lottie animation
-                            // child: Lottie.asset(
-                            //   lottieURL,
-                            //   animate: testing.isNotEmpty ? false : true,
-                            // ),
+            height: MediaQuery.of(context).size.height - 190,
+            child: tasks.isNotEmpty
+                // Task list is not empty
+                ? ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      var task = tasks[index];
+                      return Dismissible(
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (_) {
+                          base.dataStore.dalateTask(task: task);
+                        },
+                        background: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.delete_outline, color: Colors.grey),
+                            SizedBox(width: 8),
+                            Text(
+                              MyString.deleteTask,
+                              style: TextStyle(color: Colors.grey),
+                            )
+                          ],
+                        ),
+                        key: Key(task.id),
+                        child: TaskWidget(task: task),
+                      );
+                    },
+                  )
+                // Task list is empty
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Lottie animation
+                      FadeIn(
+                        child: SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: Lottie.asset(
+                            lottieURL,
+                            animate: tasks.isNotEmpty ? false : true,
                           ),
                         ),
-                        //sub text
-                        FadeInUp(
-                            from: 30,
-                            child: const Text(
-                              MyString.doneAllTask,
-                              style: TextStyle(color: Colors.black),
-                            ))
-                      ],
-                    )),
-        )
+                      ),
+                      // Sub text
+                      FadeInUp(
+                        from: 30,
+                        child: const Text(
+                          MyString.doneAllTask,
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
       ]),
     );
   }

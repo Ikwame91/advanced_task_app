@@ -1,5 +1,7 @@
+import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
+import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/tasks/components/date_time_select.dart';
 import 'package:advanced_taskapp/views/tasks/components/top_text.dart';
@@ -29,6 +31,13 @@ class _TasksViewState extends State<TasksView> {
   DateTime? time;
   DateTime? date;
 
+  @override
+  void initState() {
+    super.initState();
+    time = widget.task?.createdAtTime ?? DateTime.now();
+    date = widget.task?.createdAtDate ?? DateTime.now();
+  }
+
   /// Show Selected Time as String Format
   String showTime(DateTime? time) {
     if (widget.task?.createdAtTime == null) {
@@ -38,7 +47,10 @@ class _TasksViewState extends State<TasksView> {
         return DateFormat('hh:mm a').format(time);
       }
     } else {
-      return DateFormat('hh:mm a').format(widget.task!.createdAtTime);
+      // If task's time exists, format and return it
+      return DateFormat('hh:mm a')
+          .format(widget.task!.createdAtTime)
+          .toString();
     }
   }
 
@@ -71,6 +83,61 @@ class _TasksViewState extends State<TasksView> {
     } else {
       return widget.task!.createdAtDate;
     }
+  }
+
+  // bool isTasklreadyExists() {
+  //   if (widget.taskControllerForTitle?.text == null &&
+  //       widget.descriptiomController?.text == null) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
+
+  /// If any task already exist app will update it otherwise the app will add a new task
+  dynamic isTaskAlreadyExistUpdateTask() {
+    if (widget.taskControllerForTitle?.text != null &&
+        widget.descriptiomController?.text != null) {
+      try {
+        // Update existing task
+        widget.task?.title = title ?? widget.task!.title;
+        widget.task?.subTitle = subTitle ?? widget.task!.subTitle;
+        widget.task?.createdAtDate = date ?? widget.task!.createdAtDate;
+        widget.task?.createdAtTime = time ?? widget.task!.createdAtTime;
+
+        widget.task?.save();
+
+        widget.taskControllerForTitle?.clear();
+        widget.descriptiomController?.clear();
+
+        Navigator.of(context).pop();
+      } catch (error) {
+        nothingEnterOnUpdateTaskMode(context);
+      }
+    } else {
+      // Create a new task
+      if (title != null && subTitle != null) {
+        var task = Task.create(
+          title: title!,
+          createdAtTime: time,
+          createdAtDate: date,
+          subTitle: subTitle!,
+        );
+
+        BaseWidget.of(context).dataStore.addTask(task: task);
+
+        widget.taskControllerForTitle?.clear();
+        widget.descriptiomController?.clear();
+
+        Navigator.of(context).pop();
+      } else {
+        emptyFieldsWarning(context);
+      }
+    }
+  }
+
+  dynamic deleteTask() {
+    return widget.task?.delete();
   }
 
   @override
@@ -134,8 +201,7 @@ class _TasksViewState extends State<TasksView> {
 
                       DateTimeSelection(
                         title: MyString.timeString,
-                        time:
-                            showTime(time), // Display selected or default time
+                        time: showTime(time),
                         onTap: () async {
                           TimeOfDay initialTime =
                               TimeOfDay.fromDateTime(showTimeAsDateTime(time));
@@ -144,7 +210,7 @@ class _TasksViewState extends State<TasksView> {
                               await showModalBottomSheet<TimeOfDay>(
                             context: context,
                             builder: (_) => SizedBox(
-                              height: 220,
+                              height: 400,
                               child: TimePickerDialog(initialTime: initialTime),
                             ),
                           );
@@ -152,18 +218,21 @@ class _TasksViewState extends State<TasksView> {
                           if (selectedTime != null) {
                             setState(() {
                               if (widget.task?.createdAtTime == null) {
-                                time = DateTime(
-                                  DateTime.now().year,
-                                  DateTime.now().month,
-                                  DateTime.now().day,
+                                time = time = DateTime(
+                                  date?.year ??
+                                      DateTime.now()
+                                          .year, // Use the selected date if available
+                                  date?.month ?? DateTime.now().month,
+                                  date?.day ?? DateTime.now().day,
                                   selectedTime.hour,
                                   selectedTime.minute,
                                 );
                               } else {
                                 widget.task!.createdAtTime = DateTime(
-                                  DateTime.now().year,
-                                  DateTime.now().month,
-                                  DateTime.now().day,
+                                  date?.year ?? widget.task!.createdAtDate.year,
+                                  date?.month ??
+                                      widget.task!.createdAtDate.month,
+                                  date?.day ?? widget.task!.createdAtDate.day,
                                   selectedTime.hour,
                                   selectedTime.minute,
                                 );
@@ -223,7 +292,13 @@ class _TasksViewState extends State<TasksView> {
                               if (widget.task?.createdAtDate == null) {
                                 date = selectedDate;
                               } else {
-                                widget.task!.createdAtDate = selectedDate;
+                                widget.task!.createdAtDate = DateTime(
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                  widget.task!.createdAtTime.hour,
+                                  widget.task!.createdAtTime.minute,
+                                );
                               }
                             });
                           }
@@ -233,10 +308,17 @@ class _TasksViewState extends State<TasksView> {
                       ),
 
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment:
+                            //     ? MainAxisAlignment.center
+                            MainAxisAlignment.spaceEvenly,
                         children: [
+                          // isTasklreadyExists()
+
                           MaterialButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              deleteTask();
+                              Navigator.pop(context);
+                            },
                             minWidth: 150,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
@@ -257,13 +339,17 @@ class _TasksViewState extends State<TasksView> {
                             ),
                           ),
                           MaterialButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              isTaskAlreadyExistUpdateTask();
+                            },
                             minWidth: 150,
                             color: MyColors.primaryColor,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15)),
                             height: 50,
                             child: Text(
+                              //              isTasklreadyExists()
+                              // ? MyString.addTaskString
                               MyString.addTaskString,
                               style: TextStyle(color: Colors.white),
                             ),
