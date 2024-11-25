@@ -5,26 +5,23 @@ import 'package:flutter/material.dart';
 class TopText extends StatelessWidget {
   const TopText({
     super.key,
-    this.taskControllerForTitle,
-    this.descriptiomController,
     this.task,
+    this.taskControllerForTitle,
   });
-  final TextEditingController? taskControllerForTitle;
-  final TextEditingController? descriptiomController;
-  final Task? task;
 
-  bool isTasklreadyExists() {
-    if (taskControllerForTitle?.text == null &&
-        descriptiomController?.text == null) {
-      return false;
-    } else {
-      return true;
-    }
-  }
+  final Task? task;
+  final TextEditingController? taskControllerForTitle;
 
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
+    bool isTasklreadyExists() {
+      if (taskControllerForTitle?.text == null) {
+        return true;
+      } else {
+        return false;
+      }
+    }
 
     return SizedBox(
       width: double.infinity,
@@ -42,8 +39,8 @@ class TopText extends StatelessWidget {
           RichText(
             text: TextSpan(
                 text: isTasklreadyExists()
-                    ? MyString.addNewTask
-                    : MyString.updateCurrentTask,
+                    ? MyString.updateCurrentTask
+                    : MyString.addNewTask,
                 style: textTheme.headlineSmall,
                 children: const [
                   TextSpan(

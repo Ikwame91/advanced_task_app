@@ -1,3 +1,4 @@
+import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
 import 'package:advanced_taskapp/views/tasks/tasks_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,16 +9,17 @@ class FloatingTaskwidget extends StatelessWidget {
     super.key,
   });
 
+
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController textEditingController = TextEditingController();
     return GestureDetector(
       onTap: () {
         Navigator.push(
             context,
             CupertinoPageRoute(
               builder: (_) => TasksView(
-                taskControllerForTitle: textEditingController,
+                taskControllerForTitle: null,
                 descriptiomController: null,
                 task: null,
               ),

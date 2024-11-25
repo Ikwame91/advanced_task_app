@@ -22,8 +22,25 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final TextEditingController controller = TextEditingController();
   GlobalKey<SliderDrawerState> drawerKey = GlobalKey<SliderDrawerState>();
-  String _selectedSortOption = 'Title';
 
+  int checkDoneTask(List<Task> task) {
+    int i = 0;
+    for (Task doneTasks in task) {
+      if (doneTasks.isCompleted) {
+        i++;
+      }
+    }
+    return i;
+  }
+
+  /// Checking The Value Of the Circle Indicator
+  dynamic valueOfTheIndicator(List<Task> task) {
+    if (task.isNotEmpty) {
+      return task.length;
+    } else {
+      return 3;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +49,10 @@ class _HomeViewState extends State<HomeView> {
 
     return ValueListenableBuilder(
       valueListenable: base.dataStore.listenToTask(),
-      builder: ( ctx, Box<Task> box, Widget? child) {
+      builder: (ctx, Box<Task> box, Widget? child) {
         var tasks = box.values.toList();
 
-          tasks.sort(((a, b) => a.createdAtDate.compareTo(b.createdAtDate)));
+        tasks.sort(((a, b) => b.createdAtDate.compareTo(a.createdAtDate))); // Sort by date descending
         return GestureDetector(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
@@ -54,7 +71,6 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   child: _buildBody(
                     textTheme,
-                    
                     base,
                     tasks,
                   ))),
@@ -63,8 +79,11 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildBody(TextTheme textTheme, BaseWidget base,
-      List<Task> tasks,) {
+  Widget _buildBody(
+    TextTheme textTheme,
+    BaseWidget base,
+    List<Task> tasks,
+  ) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -78,11 +97,11 @@ class _HomeViewState extends State<HomeView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               /// CircularProgressIndicator
-              const SizedBox(
+              SizedBox(
                 width: 25,
                 height: 25,
                 child: CircularProgressIndicator(
-                  value: 1 / 3,
+                  value: checkDoneTask(tasks) / valueOfTheIndicator(tasks),
                   valueColor: AlwaysStoppedAnimation(Colors.blue),
                   backgroundColor: Colors.grey,
                 ),
@@ -99,8 +118,8 @@ class _HomeViewState extends State<HomeView> {
                     height: 3,
                   ),
                   Text(
-                    " 1 0f 3",
-                    style: textTheme.displayMedium,
+                    "${checkDoneTask(tasks)} of ${tasks.length} task",
+                    style: textTheme.titleMedium,
                   ),
                 ],
               )

@@ -85,42 +85,44 @@ class _TasksViewState extends State<TasksView> {
     }
   }
 
-  // bool isTasklreadyExists() {
-  //   if (widget.taskControllerForTitle?.text == null &&
-  //       widget.descriptiomController?.text == null) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
+  bool isTasklreadyExists() {
+    if (widget.taskControllerForTitle?.text == null &&
+        widget.descriptiomController?.text == null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool doesTaskExist() {
+    return widget.taskControllerForTitle?.text != null &&
+        widget.descriptiomController?.text != null;
+  }
 
   /// If any task already exist app will update it otherwise the app will add a new task
-  dynamic isTaskAlreadyExistUpdateTask() {
-    if (widget.taskControllerForTitle?.text != null &&
-        widget.descriptiomController?.text != null) {
+  void isTaskAlreadyExistUpdateTask() {
+    if (doesTaskExist()) {
       try {
-        // Update existing task
         widget.task?.title = title ?? widget.task!.title;
         widget.task?.subTitle = subTitle ?? widget.task!.subTitle;
         widget.task?.createdAtDate = date ?? widget.task!.createdAtDate;
         widget.task?.createdAtTime = time ?? widget.task!.createdAtTime;
 
-        widget.task?.save();
+        widget.task?.save(); // Ensure changes are saved to Hive
 
         widget.taskControllerForTitle?.clear();
         widget.descriptiomController?.clear();
 
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Navigate back
       } catch (error) {
         nothingEnterOnUpdateTaskMode(context);
       }
     } else {
-      // Create a new task
       if (title != null && subTitle != null) {
         var task = Task.create(
           title: title!,
-          createdAtTime: time,
-          createdAtDate: date,
+          createdAtTime: time ?? DateTime.now(),
+          createdAtDate: date ?? DateTime.now(),
           subTitle: subTitle!,
         );
 
@@ -308,36 +310,36 @@ class _TasksViewState extends State<TasksView> {
                       ),
 
                       Row(
-                        mainAxisAlignment:
-                            //     ? MainAxisAlignment.center
-                            MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: isTasklreadyExists()
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.spaceEvenly,
                         children: [
-                          // isTasklreadyExists()
-
-                          MaterialButton(
-                            onPressed: () {
-                              deleteTask();
-                              Navigator.pop(context);
-                            },
-                            minWidth: 150,
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15)),
-                            height: 50,
-                            child: const Row(
-                              children: [
-                                Icon(CupertinoIcons.trash),
-                                SizedBox(
-                                  width: 5,
+                          isTasklreadyExists()
+                              ? Container()
+                              : MaterialButton(
+                                  onPressed: () {
+                                    deleteTask();
+                                    Navigator.pop(context);
+                                  },
+                                  minWidth: 150,
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15)),
+                                  height: 50,
+                                  child: const Row(
+                                    children: [
+                                      Icon(CupertinoIcons.trash),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        MyString.deleteTask,
+                                        style: TextStyle(
+                                            color: MyColors.primaryColor),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  MyString.deleteTask,
-                                  style:
-                                      TextStyle(color: MyColors.primaryColor),
-                                ),
-                              ],
-                            ),
-                          ),
                           MaterialButton(
                             onPressed: () {
                               isTaskAlreadyExistUpdateTask();
@@ -348,9 +350,9 @@ class _TasksViewState extends State<TasksView> {
                                 borderRadius: BorderRadius.circular(15)),
                             height: 50,
                             child: Text(
-                              //              isTasklreadyExists()
-                              // ? MyString.addTaskString
-                              MyString.addTaskString,
+                              isTasklreadyExists()
+                                  ? MyString.addTaskString
+                                  : MyString.addTaskString,
                               style: TextStyle(color: Colors.white),
                             ),
                           ),

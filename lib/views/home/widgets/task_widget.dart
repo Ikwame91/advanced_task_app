@@ -1,5 +1,7 @@
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
+import 'package:advanced_taskapp/views/tasks/tasks_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -37,13 +39,21 @@ class _TaskWidgetState extends State<TaskWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ///navigate to task view to view details about task
+        Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => TasksView(
+                taskControllerForTitle: textEditingControllerForTitle,
+                descriptiomController: textEditingControllerForSubTitle,
+                task: widget.task,
+              ),
+            ));
       },
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
             color: widget.task.isCompleted
-                ? MyColors.primaryColor.withOpacity(0.2)
+                ? MyColors.primaryColor.withOpacity(0.6)
                 : Colors.white,
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
@@ -57,7 +67,8 @@ class _TaskWidgetState extends State<TaskWidget> {
         child: ListTile(
           leading: GestureDetector(
             onTap: () {
-              //check or uncheck the icon
+              widget.task.isCompleted = !widget.task.isCompleted;
+              widget.task.save();
             },
             child: AnimatedContainer(
               decoration: BoxDecoration(
@@ -80,7 +91,7 @@ class _TaskWidgetState extends State<TaskWidget> {
               top: 3,
             ),
             child: Text(
-             textEditingControllerForTitle.text,
+              textEditingControllerForTitle.text,
               style: TextStyle(
                 color: widget.task.isCompleted
                     ? MyColors.primaryColor
@@ -95,7 +106,7 @@ class _TaskWidgetState extends State<TaskWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-               textEditingControllerForSubTitle.text,
+                textEditingControllerForSubTitle.text,
                 style: TextStyle(
                   color: widget.task.isCompleted
                       ? MyColors.primaryColor
