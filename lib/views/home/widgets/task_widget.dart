@@ -9,23 +9,25 @@ class TaskWidget extends StatefulWidget {
   const TaskWidget({
     super.key,
     required this.task,
+    required this.onTaskUpdated,
   });
   final Task task;
-
+  final VoidCallback onTaskUpdated;
   @override
   State<TaskWidget> createState() => _TaskWidgetState();
 }
 
 class _TaskWidgetState extends State<TaskWidget> {
-  TextEditingController textEditingControllerForTitle = TextEditingController();
-  TextEditingController textEditingControllerForSubTitle =
-      TextEditingController();
+  late TextEditingController textEditingControllerForTitle;
+  late TextEditingController textEditingControllerForSubTitle;
 
   @override
   void initState() {
-    textEditingControllerForTitle.text = widget.task.title;
-    textEditingControllerForSubTitle.text = widget.task.subTitle;
     super.initState();
+    textEditingControllerForTitle =
+        TextEditingController(text: widget.task.title);
+    textEditingControllerForSubTitle =
+        TextEditingController(text: widget.task.subTitle);
   }
 
   @override
@@ -38,16 +40,32 @@ class _TaskWidgetState extends State<TaskWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
             context,
             CupertinoPageRoute(
               builder: (context) => TasksView(
+            
                 taskControllerForTitle: textEditingControllerForTitle,
                 descriptiomController: textEditingControllerForSubTitle,
                 task: widget.task,
-              ),
-            ));
+          onTaskUpdated: (updatedTask) {
+                // Update task and notify parent
+                if (updatedTask == null) {
+                  // Task was deleted, rebuild UI
+                  widget.onTaskUpdated();
+                } else {
+                  // Task was updated, reflect changes
+                  setState(() {
+                    widget.task.title = updatedTask.title;
+                    widget.task.subTitle = updatedTask.subTitle;
+                  });
+                  widget.onTaskUpdated();
+                }
+              },
+            ),
+          ),
+        );
       },
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -67,8 +85,12 @@ class _TaskWidgetState extends State<TaskWidget> {
         child: ListTile(
           leading: GestureDetector(
             onTap: () {
-              widget.task.isCompleted = !widget.task.isCompleted;
+              setState(() {
+                widget.task.isCompleted = !widget.task.isCompleted;
               widget.task.save();
+               
+              });
+              widget.onTaskUpdated();
             },
             child: AnimatedContainer(
               decoration: BoxDecoration(

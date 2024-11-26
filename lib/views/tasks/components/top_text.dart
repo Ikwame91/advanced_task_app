@@ -15,8 +15,13 @@ class TopText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
-    final bool taskExists =
-        (task != null) && (taskControllerForTitle?.text.isNotEmpty ?? false);
+    bool taskExists(){
+      if(task==null){
+      return  false;
+      }else{
+        return true;
+      }
+    }
 
     return SizedBox(
       width: double.infinity,
@@ -33,7 +38,7 @@ class TopText extends StatelessWidget {
           ),
           RichText(
             text: TextSpan(
-                text: taskExists
+                text: taskExists()
                     ? MyString.updateCurrentTask
                     : MyString.addNewTask,
                 style: textTheme.headlineSmall,

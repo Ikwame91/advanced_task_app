@@ -1,3 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
@@ -8,35 +11,50 @@ import 'package:advanced_taskapp/views/tasks/components/date_time_select.dart';
 import 'package:advanced_taskapp/views/tasks/components/top_text.dart';
 import 'package:advanced_taskapp/views/tasks/widgets/task_view_appbar.dart';
 import 'package:advanced_taskapp/views/tasks/widgets/tasktextfield.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TasksView extends StatefulWidget {
   const TasksView({
-    super.key,
-    required this.taskControllerForTitle,
-    required this.descriptiomController,
+    Key? key,
+    this.taskControllerForTitle,
+    this.descriptiomController,
     required this.task,
-  });
+    required this.onTaskUpdated,
+  }) : super(key: key);
   final TextEditingController? taskControllerForTitle;
   final TextEditingController? descriptiomController;
   final Task? task;
+  final Function(Task?) onTaskUpdated;
   @override
   State<TasksView> createState() => _TasksViewState();
 }
 
 class _TasksViewState extends State<TasksView> {
-  var title;
-  var subTitle;
+  late TextEditingController taskControllerForTitle;
+  late TextEditingController descriptiomController;
+  // var title;
+  // var subTitle;
   DateTime? time;
   DateTime? date;
 
   @override
   void initState() {
     super.initState();
+    taskControllerForTitle = widget.taskControllerForTitle ??
+        TextEditingController(text: widget.task?.title ?? '');
+    descriptiomController = widget.descriptiomController ??
+        TextEditingController(text: widget.task?.subTitle ?? '');
+
+    // Initialize time and date
     time = widget.task?.createdAtTime ?? DateTime.now();
     date = widget.task?.createdAtDate ?? DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers only if they were created locally
+    if (widget.taskControllerForTitle == null) taskControllerForTitle.dispose();
+    if (widget.descriptiomController == null) descriptiomController.dispose();
+    super.dispose();
   }
 
   /// Show Selected Time as String Format
@@ -68,59 +86,51 @@ class _TasksViewState extends State<TasksView> {
   }
 
   bool isTasklreadyExists() {
-    if (widget.taskControllerForTitle?.text == null &&
-        widget.descriptiomController?.text == null) {
+    if (taskControllerForTitle.text == null &&
+        descriptiomController.text == null) {
       return true;
     } else {
       return false;
     }
   }
 
-  bool doesTaskExist() {
-    return widget.taskControllerForTitle?.text != null &&
-        widget.descriptiomController?.text != null;
-  }
-
   /// If any task already exist app will update it otherwise the app will add a new task
   void isTaskAlreadyExistUpdateTask() {
-    if (doesTaskExist()) {
-      try {
-        widget.task?.title = title ?? widget.task!.title;
-        widget.task?.subTitle = subTitle ?? widget.task!.subTitle;
-        widget.task?.createdAtDate = date ?? widget.task!.createdAtDate;
-        widget.task?.createdAtTime = time ?? widget.task!.createdAtTime;
-
-        widget.task?.save(); // Ensure changes are saved to Hive
-
-        widget.taskControllerForTitle?.clear();
-        widget.descriptiomController?.clear();
-
-        Navigator.of(context).pop(); // Navigate back
-      } catch (error) {
-        nothingEnterOnUpdateTaskMode(context);
-      }
-    } else {
-      if (title != null && subTitle != null) {
-        var task = Task.create(
-          title: title!,
-          createdAtTime: time ?? DateTime.now(),
-          createdAtDate: date ?? DateTime.now(),
-          subTitle: subTitle!,
-        );
-
-        BaseWidget.of(context).dataStore.addTask(task: task);
-
-        widget.taskControllerForTitle?.clear();
-        widget.descriptiomController?.clear();
-
-        Navigator.of(context).pop();
+    if (taskControllerForTitle.text.trim().isNotEmpty &&
+        descriptiomController.text.trim().isNotEmpty) {
+      if (widget.task != null) {
+        // Update existing task
+        setState(() {
+          widget.task?.title = taskControllerForTitle.text.trim();
+          widget.task?.subTitle = descriptiomController.text.trim();
+          widget.task?.createdAtDate = date ?? DateTime.now();
+          widget.task?.createdAtTime = time ?? DateTime.now();
+          widget.task?.save(); // Save changes to Hive
+          widget.onTaskUpdated(widget.task);
+        });
       } else {
-        emptyFieldsWarning(context);
+        // Add a new task
+        final newTask = Task.create(
+          title: taskControllerForTitle.text.trim(),
+          subTitle: descriptiomController.text.trim(),
+          createdAtDate: date,
+          createdAtTime: time,
+        );
+        BaseWidget.of(context).dataStore.addTask(task: newTask);
+        widget.onTaskUpdated(newTask);
       }
+
+      // Clear fields and navigate back
+      taskControllerForTitle.clear();
+      descriptiomController.clear();
+      Navigator.of(context).pop();
+    } else {
+      emptyFieldsWarning(context);
     }
   }
 
   dynamic deleteTask() {
+    widget.onTaskUpdated(null);
     return widget.task?.delete();
   }
 
@@ -156,31 +166,24 @@ class _TasksViewState extends State<TasksView> {
 
                       /// Title TextField
                       TaskTextField(
-                        controller: widget.taskControllerForTitle ??
-                            TextEditingController(),
-                        onFieldSubmitted: (String inputTitle) {
-                          title = inputTitle;
-                        },
-                        onChanged: (String inputTitle) {
-                          title = inputTitle;
-                        },
+                        controller: taskControllerForTitle,
+                        onChanged: (value) => setState(() {
+                          widget.task?.title = value;
+                        }),
+                        onFieldSubmitted: (value) => setState(() {
+                          widget.task?.title = value;
+                        }),
                       ),
-
-                      const SizedBox(
-                        height: 10,
-                      ),
-
-                      /// Note TextField
+                      // Task Description TextField
                       TaskTextField(
-                        controller: widget.descriptiomController ??
-                            TextEditingController(),
+                        controller: descriptiomController,
                         isForDescription: true,
-                        onFieldSubmitted: (String inputSubTitle) {
-                          subTitle = inputSubTitle;
-                        },
-                        onChanged: (String inputSubTitle) {
-                          subTitle = inputSubTitle;
-                        },
+                        onChanged: (value) => setState(() {
+                          widget.task?.subTitle = value;
+                        }),
+                        onFieldSubmitted: (value) => setState(() {
+                          widget.task?.subTitle = value;
+                        }),
                       ),
                       DateTimeSelection(
                         title: MyString.timeString,
@@ -193,6 +196,7 @@ class _TasksViewState extends State<TasksView> {
                           );
 
                           if (selectedTime != null) {
+                            // Ensure only the time part changes, and date remains intact
                             setState(() {
                               time = DateTime(
                                 date?.year ?? DateTime.now().year,
@@ -218,6 +222,7 @@ class _TasksViewState extends State<TasksView> {
                           );
 
                           if (selectedDate != null) {
+                            // Update both date and time components to maintain consistency
                             setState(() {
                               date = DateTime(
                                 selectedDate.year,
@@ -230,28 +235,6 @@ class _TasksViewState extends State<TasksView> {
                           }
                         },
                       ),
-                      // DateTimeSelection(
-                      //     title: MyString.dateString,
-                      //     time: showDate(date),
-                      //     onTap: () async {
-                      //       DateTime? selectedDate = await showDatePicker(
-                      //         context: context,
-                      //         initialDate: date ?? DateTime.now(),
-                      //         firstDate: DateTime(2000),
-                      //         lastDate: DateTime(2100),
-                      //       );
-                      //       if (selectedDate != null) {
-                      //         setState(() {
-                      //           date = DateTime(
-                      //             selectedDate.year,
-                      //             selectedDate.month,
-                      //             selectedDate.day,
-                      //             time?.hour ?? DateTime.now().hour,
-                      //             time?.minute ?? DateTime.now().minute,
-                      //           );
-                      //         });
-                      //       }
-                      //     }),
 
                       Row(
                         mainAxisAlignment: isTasklreadyExists()

@@ -120,10 +120,8 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(
                     height: 3,
                   ),
-                  Text(
-                    "${checkDoneTask(tasks)} of ${tasks.length} task",
-                    style: textTheme.titleMedium,
-                  ),
+                  Text("${checkDoneTask(tasks)} of ${tasks.length} task",
+                      style: textTheme.titleMedium),
                 ],
               )
             ],
@@ -132,36 +130,10 @@ class _HomeViewState extends State<HomeView> {
         const Padding(
           padding: EdgeInsets.only(top: 10.0),
           child: Divider(
-            thickness: 2,
+            thickness: 3,
             indent: 80,
           ),
         ),
-
-        // Sorting dropdown
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       Text("Sort Tasks By:", style: textTheme.headlineSmall),
-        //       DropdownButton<String>(
-        //         value: _selectedSortOption,
-        //         items: ['Title', 'Date'].map((String option) {
-        //           return DropdownMenuItem<String>(
-        //             value: option,
-        //             child: Text(option),
-        //           );
-        //         }).toList(),
-        //         onChanged: (String? newValue) {
-        //           if (newValue != null) {
-        //             _selectedSortOption = newValue;
-        //             _sortTasks(tasks); // Apply sorting
-        //           }
-        //         },
-        //       ),
-        //     ],
-        //   ),
-        // ),
 
         Flexible(
           child: SizedBox(
@@ -195,7 +167,15 @@ class _HomeViewState extends State<HomeView> {
                           ),
                         ),
                         key: Key(task.id),
-                        child: TaskWidget(task: task),
+                        child: TaskWidget(
+                          onTaskUpdated: (){
+                            setState(() {
+                              
+                            });
+                          },
+                         
+                         
+                          task: task),
                       );
                     },
                   )
