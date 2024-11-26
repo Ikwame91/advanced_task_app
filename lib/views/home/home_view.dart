@@ -52,7 +52,8 @@ class _HomeViewState extends State<HomeView> {
       builder: (ctx, Box<Task> box, Widget? child) {
         var tasks = box.values.toList();
 
-        tasks.sort(((a, b) => b.createdAtDate.compareTo(a.createdAtDate))); // Sort by date descending
+        // final task = base.dataStore.getSortedTasks(box);
+
         return GestureDetector(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
@@ -101,7 +102,9 @@ class _HomeViewState extends State<HomeView> {
                 width: 25,
                 height: 25,
                 child: CircularProgressIndicator(
-                  value: checkDoneTask(tasks) / valueOfTheIndicator(tasks),
+                  value: tasks.isNotEmpty
+                      ? checkDoneTask(tasks) / valueOfTheIndicator(tasks)
+                      : 0.0,
                   valueColor: AlwaysStoppedAnimation(Colors.blue),
                   backgroundColor: Colors.grey,
                 ),
@@ -175,16 +178,21 @@ class _HomeViewState extends State<HomeView> {
                         onDismissed: (_) {
                           base.dataStore.dalateTask(task: task);
                         },
-                        background: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.delete_outline, color: Colors.grey),
-                            SizedBox(width: 8),
-                            Text(
-                              MyString.deleteTask,
-                              style: TextStyle(color: Colors.grey),
-                            )
-                          ],
+                        background: Container(
+                          color: Colors.red.withOpacity(0.5),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete_outline, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                MyString.deleteTask,
+                                style: TextStyle(color: Colors.white),
+                              )
+                            ],
+                          ),
                         ),
                         key: Key(task.id),
                         child: TaskWidget(task: task),

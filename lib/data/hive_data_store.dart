@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -30,5 +29,10 @@ class HiveDataStore {
 
   ValueListenable<Box<Task>> listenToTask() {
     return box.listenable();
+  }
+
+  List<Task> getSortedTasks(Box<Task> box) {
+    return box.values.toList()
+      ..sort((a, b) => b.createdAtDate.compareTo(a.createdAtDate));
   }
 }

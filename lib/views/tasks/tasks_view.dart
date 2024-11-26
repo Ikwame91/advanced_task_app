@@ -2,6 +2,7 @@ import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
 import 'package:advanced_taskapp/utils/constants.dart';
+import 'package:advanced_taskapp/utils/date_utils.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/tasks/components/date_time_select.dart';
 import 'package:advanced_taskapp/views/tasks/components/top_text.dart';
@@ -40,18 +41,12 @@ class _TasksViewState extends State<TasksView> {
 
   /// Show Selected Time as String Format
   String showTime(DateTime? time) {
-    if (widget.task?.createdAtTime == null) {
-      if (time == null) {
-        return DateFormat('hh:mm a').format(DateTime.now());
-      } else {
-        return DateFormat('hh:mm a').format(time);
-      }
-    } else {
-      // If task's time exists, format and return it
-      return DateFormat('hh:mm a')
-          .format(widget.task!.createdAtTime)
-          .toString();
-    }
+    return DateTimeUtils.formatTime(time ?? DateTime.now());
+  }
+
+  /// Show Selected Date as String Format
+  String showDate(DateTime? date) {
+    return DateTimeUtils.formatDate(date ?? DateTime.now());
   }
 
   /// Show Selected Time as DateTime Format
@@ -60,19 +55,6 @@ class _TasksViewState extends State<TasksView> {
       return time ?? DateTime.now();
     } else {
       return widget.task!.createdAtTime;
-    }
-  }
-
-  /// Show Selected Date as String Format
-  String showDate(DateTime? date) {
-    if (widget.task?.createdAtDate == null) {
-      if (date == null) {
-        return DateFormat.yMMMEd().format(DateTime.now());
-      } else {
-        return DateFormat.yMMMEd().format(date);
-      }
-    } else {
-      return DateFormat.yMMMEd().format(widget.task!.createdAtDate);
     }
   }
 
@@ -200,114 +182,76 @@ class _TasksViewState extends State<TasksView> {
                           subTitle = inputSubTitle;
                         },
                       ),
-
                       DateTimeSelection(
                         title: MyString.timeString,
                         time: showTime(time),
                         onTap: () async {
-                          TimeOfDay initialTime =
-                              TimeOfDay.fromDateTime(showTimeAsDateTime(time));
-
-                          TimeOfDay? selectedTime =
-                              await showModalBottomSheet<TimeOfDay>(
+                          TimeOfDay? selectedTime = await showTimePicker(
                             context: context,
-                            builder: (_) => SizedBox(
-                              height: 400,
-                              child: TimePickerDialog(initialTime: initialTime),
-                            ),
+                            initialTime:
+                                TimeOfDay.fromDateTime(time ?? DateTime.now()),
                           );
 
                           if (selectedTime != null) {
                             setState(() {
-                              if (widget.task?.createdAtTime == null) {
-                                time = time = DateTime(
-                                  date?.year ??
-                                      DateTime.now()
-                                          .year, // Use the selected date if available
-                                  date?.month ?? DateTime.now().month,
-                                  date?.day ?? DateTime.now().day,
-                                  selectedTime.hour,
-                                  selectedTime.minute,
-                                );
-                              } else {
-                                widget.task!.createdAtTime = DateTime(
-                                  date?.year ?? widget.task!.createdAtDate.year,
-                                  date?.month ??
-                                      widget.task!.createdAtDate.month,
-                                  date?.day ?? widget.task!.createdAtDate.day,
-                                  selectedTime.hour,
-                                  selectedTime.minute,
-                                );
-                              }
+                              time = DateTime(
+                                date?.year ?? DateTime.now().year,
+                                date?.month ?? DateTime.now().month,
+                                date?.day ?? DateTime.now().day,
+                                selectedTime.hour,
+                                selectedTime.minute,
+                              );
                             });
                           }
-
-                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
 
                       DateTimeSelection(
-                        isTime: true,
                         title: MyString.dateString,
                         time: showDate(date),
                         onTap: () async {
-                          DateTime initialDate = showDateAsDateTime(date);
-
-                          DateTime? selectedDate =
-                              await showModalBottomSheet<DateTime>(
+                          DateTime? selectedDate = await showDatePicker(
                             context: context,
-                            builder: (_) {
-                              return Container(
-                                padding: const EdgeInsets.all(16),
-                                height: 400,
-                                child: Column(
-                                  children: [
-                                    const Text(
-                                      "Pick a Date",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Expanded(
-                                      child: CalendarDatePicker(
-                                        initialDate: initialDate,
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2100),
-                                        onDateChanged: (selectedDate) {
-                                          Navigator.pop(
-                                            context,
-                                            selectedDate,
-                                          ); // Return selected date
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                            initialDate: date ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
                           );
 
                           if (selectedDate != null) {
                             setState(() {
-                              if (widget.task?.createdAtDate == null) {
-                                date = selectedDate;
-                              } else {
-                                widget.task!.createdAtDate = DateTime(
-                                  selectedDate.year,
-                                  selectedDate.month,
-                                  selectedDate.day,
-                                  widget.task!.createdAtTime.hour,
-                                  widget.task!.createdAtTime.minute,
-                                );
-                              }
+                              date = DateTime(
+                                selectedDate.year,
+                                selectedDate.month,
+                                selectedDate.day,
+                                time?.hour ?? DateTime.now().hour,
+                                time?.minute ?? DateTime.now().minute,
+                              );
                             });
                           }
-
-                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
+                      // DateTimeSelection(
+                      //     title: MyString.dateString,
+                      //     time: showDate(date),
+                      //     onTap: () async {
+                      //       DateTime? selectedDate = await showDatePicker(
+                      //         context: context,
+                      //         initialDate: date ?? DateTime.now(),
+                      //         firstDate: DateTime(2000),
+                      //         lastDate: DateTime(2100),
+                      //       );
+                      //       if (selectedDate != null) {
+                      //         setState(() {
+                      //           date = DateTime(
+                      //             selectedDate.year,
+                      //             selectedDate.month,
+                      //             selectedDate.day,
+                      //             time?.hour ?? DateTime.now().hour,
+                      //             time?.minute ?? DateTime.now().minute,
+                      //           );
+                      //         });
+                      //       }
+                      //     }),
 
                       Row(
                         mainAxisAlignment: isTasklreadyExists()
