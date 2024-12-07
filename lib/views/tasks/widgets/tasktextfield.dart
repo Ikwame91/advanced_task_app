@@ -17,6 +17,12 @@ class TaskTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.grey.shade400, width: 1),
+          bottom: BorderSide(color: Colors.grey.shade400, width: 1),
+        ),
+      ),
       width: MediaQuery.of(context).size.width,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: ListTile(
@@ -30,13 +36,9 @@ class TaskTextField extends StatelessWidget {
                 ? const Icon(Icons.bookmark_border, color: Colors.grey)
                 : null,
             border: InputBorder.none,
-            enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade300)),
             hintText: MyString.addNote,
-            focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade300)),
           ),
-          onFieldSubmitted:onFieldSubmitted,
+          onFieldSubmitted: onFieldSubmitted,
           onChanged: onChanged,
         ),
       ),

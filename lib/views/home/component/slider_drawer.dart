@@ -1,3 +1,4 @@
+import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _SliderDrawerWidgetState extends State<SliderDrawerWidget>
 
   @override
   Widget build(BuildContext context) {
+    var base = BaseWidget.of(context).dataStore.box;
     return SizedBox(
       width: double.infinity,
       height: 132,
@@ -76,10 +78,9 @@ class _SliderDrawerWidgetState extends State<SliderDrawerWidget>
               padding: const EdgeInsets.only(right: 20),
               child: GestureDetector(
                 onTap: () {
-                  deleteAllTask(context);
-                  // base.isEmpty
-                  //     ? warningNoTask(context)
-                  //     : deleteAllTask(context);
+                  base.isEmpty
+                      ? warningNoTask(context)
+                      : deleteAllTask(context);
                 },
                 child: const Icon(
                   CupertinoIcons.trash,

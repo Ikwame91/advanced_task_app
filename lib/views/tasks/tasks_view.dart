@@ -102,7 +102,10 @@ class _TasksViewState extends State<TasksView> {
           widget.task?.createdAtDate = date ?? DateTime.now();
           widget.task?.save();
           BaseWidget.of(context).dataStore.updateTask(task: widget.task!);
-        });
+          Navigator.of(context).pop();
+
+        }
+        );
       } else {
         final newTask = Task.create(
           title: taskControllerForTitle.text,
@@ -116,9 +119,7 @@ class _TasksViewState extends State<TasksView> {
         taskControllerForTitle.clear();
         descriptiomController.clear();
       }
-      
-    }
-    else{
+    } else {
       emptyFieldsWarning(context);
     }
   }
@@ -193,6 +194,9 @@ class _TasksViewState extends State<TasksView> {
                           MyString.titleOfTitleTextField,
                           style: textTheme.headlineMedium,
                         ),
+                      ),
+                      const SizedBox(
+                        height: 20,
                       ),
 
                       /// Title TextField
@@ -269,12 +273,11 @@ class _TasksViewState extends State<TasksView> {
 
                       Row(
                         mainAxisAlignment: isTasklreadyExists()
-                            ? MainAxisAlignment.center
-                            : MainAxisAlignment.spaceEvenly,
+                            ? MainAxisAlignment.spaceEvenly
+                            : MainAxisAlignment.center,
                         children: [
                           isTasklreadyExists()
-                              ? Container()
-                              : MaterialButton(
+                              ? MaterialButton(
                                   onPressed: () {
                                     deleteTask();
                                     Navigator.pop(context);
@@ -286,7 +289,7 @@ class _TasksViewState extends State<TasksView> {
                                   height: 50,
                                   child: const Row(
                                     children: [
-                                      Icon(CupertinoIcons.trash),
+                                      Icon(Icons.close),
                                       SizedBox(
                                         width: 5,
                                       ),
@@ -297,7 +300,8 @@ class _TasksViewState extends State<TasksView> {
                                       ),
                                     ],
                                   ),
-                                ),
+                                )
+                              : Container(),
                           MaterialButton(
                             onPressed: () {
                               isTaskAlreadyExistUpdateTask();
@@ -309,7 +313,7 @@ class _TasksViewState extends State<TasksView> {
                             height: 50,
                             child: Text(
                               isTasklreadyExists()
-                                  ? MyString.addTaskString
+                                  ? MyString.updateCurrentTask
                                   : MyString.addTaskString,
                               style: TextStyle(color: Colors.white),
                             ),
