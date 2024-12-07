@@ -60,14 +60,15 @@ class _SliderDrawerWidgetState extends State<SliderDrawerWidget>
             Padding(
               padding: const EdgeInsets.only(left: 20),
               child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: AnimatedIcon(
-                    icon: AnimatedIcons.menu_close,
-                    progress: controller,
-                    size: 30,
-                  ),
-                  onPressed: toggle),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                icon: AnimatedIcon(
+                  icon: AnimatedIcons.menu_close,
+                  progress: controller,
+                  size: 30,
+                ),
+                onPressed: toggle,
+              ),
             ),
 
             //Delete Icon

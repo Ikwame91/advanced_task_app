@@ -8,8 +8,6 @@ class FloatingTaskwidget extends StatelessWidget {
     super.key,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -18,9 +16,6 @@ class FloatingTaskwidget extends StatelessWidget {
             context,
             CupertinoPageRoute(
               builder: (_) => TasksView(
-                onTaskUpdated: (p0) {
-                  
-                },
                 taskControllerForTitle: null,
                 descriptiomController: null,
                 task: null,

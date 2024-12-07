@@ -9,10 +9,8 @@ class TaskWidget extends StatefulWidget {
   const TaskWidget({
     super.key,
     required this.task,
-    required this.onTaskUpdated,
   });
   final Task task;
-  final VoidCallback onTaskUpdated;
   @override
   State<TaskWidget> createState() => _TaskWidgetState();
 }
@@ -42,27 +40,12 @@ class _TaskWidgetState extends State<TaskWidget> {
     return GestureDetector(
       onTap: () async {
         await Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => TasksView(
-            
-                taskControllerForTitle: textEditingControllerForTitle,
-                descriptiomController: textEditingControllerForSubTitle,
-                task: widget.task,
-          onTaskUpdated: (updatedTask) {
-                // Update task and notify parent
-                if (updatedTask == null) {
-                  // Task was deleted, rebuild UI
-                  widget.onTaskUpdated();
-                } else {
-                  // Task was updated, reflect changes
-                  setState(() {
-                    widget.task.title = updatedTask.title;
-                    widget.task.subTitle = updatedTask.subTitle;
-                  });
-                  widget.onTaskUpdated();
-                }
-              },
+          context,
+          CupertinoPageRoute(
+            builder: (context) => TasksView(
+              taskControllerForTitle: textEditingControllerForTitle,
+              descriptiomController: textEditingControllerForSubTitle,
+              task: widget.task,
             ),
           ),
         );
@@ -87,10 +70,8 @@ class _TaskWidgetState extends State<TaskWidget> {
             onTap: () {
               setState(() {
                 widget.task.isCompleted = !widget.task.isCompleted;
-              widget.task.save();
-               
+                widget.task.save();
               });
-              widget.onTaskUpdated();
             },
             child: AnimatedContainer(
               decoration: BoxDecoration(

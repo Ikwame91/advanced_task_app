@@ -151,7 +151,7 @@ class _HomeViewState extends State<HomeView> {
                           base.dataStore.dalateTask(task: task);
                         },
                         background: Container(
-                          color: Colors.red.withOpacity(0.5),
+                          color: Colors.red.withOpacity(0.8),
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: const Row(
@@ -168,14 +168,8 @@ class _HomeViewState extends State<HomeView> {
                         ),
                         key: Key(task.id),
                         child: TaskWidget(
-                          onTaskUpdated: (){
-                            setState(() {
-                              
-                            });
-                          },
-                         
-                         
-                          task: task),
+                          
+                            task: task),
                       );
                     },
                   )

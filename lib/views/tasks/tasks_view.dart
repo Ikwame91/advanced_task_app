@@ -1,14 +1,13 @@
+import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:advanced_taskapp/main.dart';
 import 'package:advanced_taskapp/models/task.dart';
 import 'package:advanced_taskapp/utils/colors.dart';
-import 'package:advanced_taskapp/utils/constants.dart';
 import 'package:advanced_taskapp/utils/date_utils.dart';
 import 'package:advanced_taskapp/utils/strings.dart';
 import 'package:advanced_taskapp/views/tasks/components/date_time_select.dart';
-import 'package:advanced_taskapp/views/tasks/components/top_text.dart';
 import 'package:advanced_taskapp/views/tasks/widgets/task_view_appbar.dart';
 import 'package:advanced_taskapp/views/tasks/widgets/tasktextfield.dart';
 
@@ -18,12 +17,10 @@ class TasksView extends StatefulWidget {
     this.taskControllerForTitle,
     this.descriptiomController,
     required this.task,
-    required this.onTaskUpdated,
   }) : super(key: key);
   final TextEditingController? taskControllerForTitle;
   final TextEditingController? descriptiomController;
   final Task? task;
-  final Function(Task?) onTaskUpdated;
   @override
   State<TasksView> createState() => _TasksViewState();
 }
@@ -86,8 +83,8 @@ class _TasksViewState extends State<TasksView> {
   }
 
   bool isTasklreadyExists() {
-    if (taskControllerForTitle.text == null &&
-        descriptiomController.text == null) {
+    if (widget.taskControllerForTitle?.text != null &&
+        widget.descriptiomController?.text != null) {
       return true;
     } else {
       return false;
@@ -99,38 +96,34 @@ class _TasksViewState extends State<TasksView> {
     if (taskControllerForTitle.text.trim().isNotEmpty &&
         descriptiomController.text.trim().isNotEmpty) {
       if (widget.task != null) {
-        // Update existing task
         setState(() {
           widget.task?.title = taskControllerForTitle.text.trim();
           widget.task?.subTitle = descriptiomController.text.trim();
           widget.task?.createdAtDate = date ?? DateTime.now();
-          widget.task?.createdAtTime = time ?? DateTime.now();
-          widget.task?.save(); // Save changes to Hive
-          widget.onTaskUpdated(widget.task);
+          widget.task?.save();
+          BaseWidget.of(context).dataStore.updateTask(task: widget.task!);
         });
       } else {
-        // Add a new task
         final newTask = Task.create(
-          title: taskControllerForTitle.text.trim(),
-          subTitle: descriptiomController.text.trim(),
+          title: taskControllerForTitle.text,
+          subTitle: descriptiomController.text,
           createdAtDate: date,
           createdAtTime: time,
         );
         BaseWidget.of(context).dataStore.addTask(task: newTask);
-        widget.onTaskUpdated(newTask);
-      }
 
-      // Clear fields and navigate back
-      taskControllerForTitle.clear();
-      descriptiomController.clear();
-      Navigator.of(context).pop();
-    } else {
+        Navigator.of(context).pop();
+        taskControllerForTitle.clear();
+        descriptiomController.clear();
+      }
+      
+    }
+    else{
       emptyFieldsWarning(context);
     }
   }
 
   dynamic deleteTask() {
-    widget.onTaskUpdated(null);
     return widget.task?.delete();
   }
 
@@ -150,7 +143,43 @@ class _TasksViewState extends State<TasksView> {
             child: Column(
               children: [
                 //toptext
-                const TopText(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 100,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 70,
+                        child: Divider(
+                          thickness: 2,
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                            text: isTasklreadyExists()
+                                ? MyString.updateCurrentTask
+                                : MyString.addNewTask,
+                            style: textTheme.headlineSmall,
+                            children: const [
+                              TextSpan(
+                                text: MyString.taskStrnig,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              )
+                            ]),
+                      ),
+                      const SizedBox(
+                        width: 70,
+                        child: Divider(
+                          thickness: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 SizedBox(
                   width: double.infinity,
                   height: 535,
@@ -160,8 +189,10 @@ class _TasksViewState extends State<TasksView> {
                       /// Title of TextFiled
                       Padding(
                         padding: const EdgeInsets.only(left: 30),
-                        child: Text(MyString.titleOfTitleTextField,
-                            style: textTheme.headlineMedium),
+                        child: Text(
+                          MyString.titleOfTitleTextField,
+                          style: textTheme.headlineMedium,
+                        ),
                       ),
 
                       /// Title TextField
